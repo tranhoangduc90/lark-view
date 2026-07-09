@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lark View</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="query-bar" aria-label="Thông tin view">
+        <div class="query-field">
+          <label for="baseId">Base ID</label>
+          <input id="baseId" autocomplete="off" placeholder="HxvnbovVlagwPusroJylznDEgjg" />
+        </div>
+        <div class="query-field">
+          <label for="tableId">Table ID</label>
+          <input id="tableId" autocomplete="off" placeholder="tbl6Zma6lDGLXpD9" />
+        </div>
+        <div class="query-field">
+          <label for="viewId">View ID</label>
+          <input id="viewId" autocomplete="off" placeholder="vewZNExE19" />
+        </div>
+        <button id="loadButton" type="button">Tải view</button>
+      </section>
+
+      <section class="view-toolbar" aria-label="Tổng quan view">
+        <div class="toolbar-title">
+          <h1 id="pageTitle">Lark View</h1>
+          <span id="pageCount">Nhập 3 ID để tải dữ liệu.</span>
+        </div>
+        <div class="toolbar-right">
+          <span id="statusPill" class="status-pill">Sẵn sàng</span>
+        </div>
+      </section>
+
+      <section id="message" class="message" hidden></section>
+      <section id="tableMount" class="table-mount" aria-live="polite"></section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
