@@ -490,7 +490,7 @@ function renderGrid(groups, fields, fieldsByName, layout) {
 function updatePageHeader(payload, layout) {
   const returned = payload.meta?.returned ?? payload.records?.length ?? 0;
   const total = payload.meta?.total || returned;
-  els.pageTitle.textContent = layout.title || payload.view?.name || "Lark Base View";
+  els.pageTitle.textContent = layout.title || payload.view?.name || "Luyện tập bổ trợ";
   els.pageCount.textContent = `${returned}/${total} bài tập`;
   if (payload.meta?.truncated) els.pageCount.textContent += " - giới hạn";
   if (payload.view?.warning) els.pageCount.textContent += " - thiếu metadata view";

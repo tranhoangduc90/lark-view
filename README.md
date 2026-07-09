@@ -1,4 +1,4 @@
-# Lark View
+# Luyện tập bổ trợ
 
 Frontend tĩnh để học viên xem lại một Lark Base view bằng giao diện HTML riêng.
 
