@@ -1,4 +1,5 @@
 const DEFAULT_API_BASE = "https://ducizone.ddns.net/lark-view";
+const PRACTICE_PREVIEW_LIMIT = 5;
 
 function apiBase() {
   const host = window.location.hostname;
@@ -262,6 +263,22 @@ function groupRecords(records, layout, fieldsByName) {
   return result;
 }
 
+function ensurePracticeLayout(layout, fields) {
+  if (layout.groupBy) return layout;
+  const hasPracticeField = fields.some((field) => field.name === "Chờ luyện");
+  if (!hasPracticeField) return layout;
+  return {
+    ...layout,
+    groupBy: "Chờ luyện",
+    groupDesc: true,
+    groupLabels: {
+      true: "Bài cần luyện tập",
+      false: "Bài đã luyện",
+      ...(layout.groupLabels || {}),
+    },
+  };
+}
+
 function displayFields(fields, layout) {
   const names = Array.isArray(layout.displayFieldNames) ? layout.displayFieldNames : [];
   if (names.length > 0) {
@@ -322,6 +339,20 @@ function groupSectionClass(group, layout) {
   return "";
 }
 
+function isPracticeNeededGroup(group, layout) {
+  return layout.groupBy === "Chờ luyện" && unwrapValue(group.rawValue) === true;
+}
+
+function sortPracticeNeededRecords(records, fieldsByName) {
+  const fieldName = "Số lần đề xuất";
+  const field = fieldsByName.get(fieldName);
+  return [...records].sort((left, right) => {
+    const leftValue = normalizeSortValue(rawValue(left, fieldName), field);
+    const rightValue = normalizeSortValue(rawValue(right, fieldName), field);
+    return -compareValues(leftValue, rightValue);
+  });
+}
+
 function renderGroupRow(tbody, group, fields, layout, fieldsByName, sectionClass) {
   const row = document.createElement("tr");
   row.className = `group-row ${sectionClass}`.trim();
@@ -352,6 +383,54 @@ function renderGroupRow(tbody, group, fields, layout, fieldsByName, sectionClass
   tbody.appendChild(row);
 }
 
+function renderRecordRow(record, recordIndex, fields, sectionClass) {
+  const row = document.createElement("tr");
+  row.className = `record-row ${sectionClass}`.trim();
+  const indexCell = document.createElement("td");
+  indexCell.className = "index-col";
+  indexCell.textContent = String(recordIndex + 1);
+  row.appendChild(indexCell);
+
+  fields.forEach((field, index) => {
+    const cell = document.createElement("td");
+    cell.className = fieldClass(field, index);
+    appendValue(cell, rawValue(record, field.name), field, record);
+    row.appendChild(cell);
+  });
+  return row;
+}
+
+function renderPracticeToggleRow(tbody, rows, fields, sectionClass) {
+  const row = document.createElement("tr");
+  row.className = `expand-row ${sectionClass}`.trim();
+
+  const indexCell = document.createElement("td");
+  indexCell.className = "index-col";
+  indexCell.textContent = "";
+  row.appendChild(indexCell);
+
+  const cell = document.createElement("td");
+  cell.colSpan = fields.length;
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "expand-button";
+  button.setAttribute("aria-expanded", "false");
+  button.textContent = `Xem thêm bài tập (${rows.length})`;
+  button.addEventListener("click", () => {
+    const expanded = button.getAttribute("aria-expanded") === "true";
+    rows.forEach((hiddenRow) => {
+      hiddenRow.hidden = expanded;
+    });
+    button.setAttribute("aria-expanded", String(!expanded));
+    button.textContent = expanded ? `Xem thêm bài tập (${rows.length})` : "Thu gọn";
+  });
+
+  cell.appendChild(button);
+  row.appendChild(cell);
+  tbody.appendChild(row);
+}
+
 function renderGrid(groups, fields, fieldsByName, layout) {
   const scroll = document.createElement("div");
   scroll.className = "table-scroll";
@@ -377,22 +456,30 @@ function renderGrid(groups, fields, fieldsByName, layout) {
   groups.forEach((group) => {
     const sectionClass = groupSectionClass(group, layout);
     if (layout.groupBy) renderGroupRow(tbody, group, fields, layout, fieldsByName, sectionClass);
-    group.records.forEach((record, recordIndex) => {
-      const row = document.createElement("tr");
-      row.className = `record-row ${sectionClass}`.trim();
-      const indexCell = document.createElement("td");
-      indexCell.className = "index-col";
-      indexCell.textContent = String(recordIndex + 1);
-      row.appendChild(indexCell);
 
-      fields.forEach((field, index) => {
-        const cell = document.createElement("td");
-        cell.className = fieldClass(field, index);
-        appendValue(cell, rawValue(record, field.name), field, record);
-        row.appendChild(cell);
-      });
+    const practiceNeeded = isPracticeNeededGroup(group, layout);
+    const records = practiceNeeded
+      ? sortPracticeNeededRecords(group.records, fieldsByName)
+      : group.records;
+
+    const visibleRecords = practiceNeeded ? records.slice(0, PRACTICE_PREVIEW_LIMIT) : records;
+    const extraRecords = practiceNeeded ? records.slice(PRACTICE_PREVIEW_LIMIT) : [];
+
+    visibleRecords.forEach((record, recordIndex) => {
+      const row = renderRecordRow(record, recordIndex, fields, sectionClass);
       tbody.appendChild(row);
     });
+
+    const hiddenRows = extraRecords.map((record, recordIndex) => {
+      const row = renderRecordRow(record, PRACTICE_PREVIEW_LIMIT + recordIndex, fields, sectionClass);
+      row.hidden = true;
+      return row;
+    });
+
+    if (hiddenRows.length > 0) {
+      renderPracticeToggleRow(tbody, hiddenRows, fields, sectionClass);
+      hiddenRows.forEach((row) => tbody.appendChild(row));
+    }
   });
 
   table.appendChild(tbody);
@@ -412,7 +499,7 @@ function updatePageHeader(payload, layout) {
 function render(payload) {
   const fields = payload.fields || [];
   const records = payload.records || [];
-  const layout = payload.layout || {};
+  const layout = ensurePracticeLayout(payload.layout || {}, fields);
   const fieldsByName = fieldMap(fields);
   const shownFields = displayFields(fields, layout);
   const sortedRecords = sortRecords(records, layout.sort, fieldsByName);

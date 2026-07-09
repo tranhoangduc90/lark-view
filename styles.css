@@ -526,6 +526,26 @@ td {
   background: #f4fbf7;
 }
 
+.expand-row td {
+  height: 38px;
+  background: #fff9ea;
+}
+
+.expand-button {
+  height: 26px;
+  border-radius: 6px;
+  background: #fff;
+  color: #6c4a00;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 0 10px;
+  box-shadow: inset 0 0 0 1px #efd8a8;
+}
+
+.expand-button:hover {
+  background: #fffaf0;
+}
+
 .empty-cell {
   color: #b0b6c0;
 }
