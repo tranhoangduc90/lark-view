@@ -30,11 +30,13 @@ document.body.classList.toggle("has-source-params", Boolean(els.baseId.value && 
 
 function setStatus(text) {
   els.statusPill.textContent = text;
+  els.statusPill.dataset.state = ({ "Đang tải": "pending", "Đã tải": "success", "Lỗi": "error" })[text] || "neutral";
 }
 
-function showMessage(text) {
+function showMessage(text, state = "error") {
   els.message.hidden = !text;
   els.message.textContent = text || "";
+  els.message.dataset.state = state;
 }
 
 function fieldMap(fields) {
@@ -524,7 +526,7 @@ async function loadView() {
   const tableId = els.tableId.value.trim();
   const viewId = els.viewId.value.trim();
   if (!baseId || !tableId || !viewId) {
-    showMessage("Cần đủ Base ID, Table ID và View ID.");
+    showMessage("Cần đủ Base ID, Table ID và View ID.", "attention");
     return;
   }
 
@@ -548,7 +550,8 @@ async function loadView() {
     render(payload);
     setStatus("Đã tải");
   } catch (error) {
-    showMessage(error.message);
+    const previous = els.tableMount.querySelector('.record-row');
+    showMessage(error.message + (previous ? ' Dữ liệu đang hiển thị thuộc lần tải trước.' : ''));
     setStatus("Lỗi");
   } finally {
     els.loadButton.disabled = false;
