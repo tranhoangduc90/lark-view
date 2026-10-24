@@ -2,6 +2,13 @@
 
 Frontend tĩnh để học viên xem lại một Lark Base view bằng giao diện HTML riêng.
 
+Thông báo lỗi mạng fetch, phản hồi JSON không đọc được và bảng rỗng dùng câu
+tiếng Việt. Lỗi từ API giữ nguyên; khi giữ dữ liệu cũ, trang vẫn nhắc đó là lần
+tải trước. Chỉ sửa câu chữ, không đổi proxy, quyền, nhóm, số lượt hay liên kết.
+`tests/lark-recovery-copy-browser.mjs` dùng API giả; đặt
+`LARK_RECOVERY_EVIDENCE_DIR` để lưu kết quả ngoài source. Không coi bộ kiểm này
+là chứng nhận quyền Lark hoặc tài liệu đính kèm thật.
+
 ## Link public
 
 Sau khi GitHub Pages build xong, trang chạy tại:
