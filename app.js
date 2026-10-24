@@ -39,6 +39,14 @@ function showMessage(text, state = "error") {
   els.message.dataset.state = state;
 }
 
+function responseErrorMessage(error) {
+  if (error instanceof TypeError && /failed to fetch|networkerror|load failed/i.test(error.message || "")) {
+    return "Chưa kết nối được để tải dữ liệu. Hãy kiểm tra mạng rồi tải lại trang.";
+  }
+  if (error instanceof SyntaxError) return "Chưa đọc được phản hồi của hệ thống. Hãy tải lại trang để thử lại.";
+  return error.message;
+}
+
 function fieldMap(fields) {
   return new Map(fields.map((field) => [field.name, field]));
 }
@@ -513,7 +521,7 @@ function render(payload) {
   if (records.length === 0) {
     const empty = document.createElement("div");
     empty.className = "empty-state";
-    empty.textContent = "View này không có bài tập nào hoặc credential chưa có quyền đọc dữ liệu.";
+    empty.textContent = "Bảng này chưa có bài tập hoặc tài khoản kết nối chưa có quyền đọc dữ liệu.";
     els.tableMount.appendChild(empty);
     return;
   }
@@ -551,7 +559,7 @@ async function loadView() {
     setStatus("Đã tải");
   } catch (error) {
     const previous = els.tableMount.querySelector('.record-row');
-    showMessage(error.message + (previous ? ' Dữ liệu đang hiển thị thuộc lần tải trước.' : ''));
+    showMessage(responseErrorMessage(error) + (previous ? ' Dữ liệu đang hiển thị thuộc lần tải trước.' : ''));
     setStatus("Lỗi");
   } finally {
     els.loadButton.disabled = false;
