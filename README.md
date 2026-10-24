@@ -35,3 +35,7 @@ https://tranhoangduc90.github.io/lark-view/?base_id=HxvnbovVlagwPusroJylznDEgjg&
 - Backend VPS nên chỉ cho phép các `base_id` cần dùng qua `LARK_ALLOWED_APPS`.
 - Backend cần bật CORS cho origin `https://tranhoangduc90.github.io`.
 - Không để endpoint nào trả token ra trình duyệt.
+
+## Kế thừa giao diện khi sửa tiếp
+
+Đọc [bộ nhớ master #170 và nguồn hiện hành](docs/MASTER170_INTERFACE_MEMORY.md); giữ chuẩn đã phát cùng ngoại lệ, kiểm phần giao diện chịu tác động.
